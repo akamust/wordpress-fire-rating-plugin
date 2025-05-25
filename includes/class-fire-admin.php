@@ -37,64 +37,61 @@ class FIRE_Admin {
             }
 
             update_option('sypesr_criteria_config', $cleaned);
-        }
-
-        if (isset($_POST['sypesr_reset']) && check_admin_referer('sypesr_reset_action', 'sypesr_reset_nonce')) {
-            delete_option('sypesr_enabled_post_types');
-            delete_option('sypesr_criteria_config');
-            wp_redirect(admin_url('options-general.php?page=fire-settings&reset=1'));
-            exit;
+            update_option('sypesr_template_html', wp_kses_post($_POST['fire_template_html'] ?? ''));
         }
     }
 
     public function render_settings_page() {
-        $post_types = get_post_types(['public' => true], 'objects');
-        $enabled = get_option('sypesr_enabled_post_types', []);
-        $criteria = get_option('sypesr_criteria_config', []);
         ?>
         <div class="wrap">
             <h1>FIRE Rating Settings</h1>
             <form method="post">
                 <?php wp_nonce_field('save_fire_settings', 'fire_settings_nonce'); ?>
-
                 <h2 class="nav-tab-wrapper">
                     <a href="#tab-general" class="nav-tab nav-tab-active">General</a>
-                    <?php foreach ($enabled as $pt): ?>
-                        <a href="#tab-<?php echo esc_attr($pt); ?>" class="nav-tab"><?php echo esc_html($post_types[$pt]->labels->name); ?></a>
-                    <?php endforeach; ?>
+                    <a href="#tab-template" class="nav-tab">Template</a>
+                    <a href="#tab-help" class="nav-tab">Help</a>
                 </h2>
 
                 <div id="tab-general" class="tab-content" style="display:block;">
-                    <h3>Select post types for FIRE:</h3>
-                    <?php foreach ($post_types as $pt): ?>
-                        <label><input type="checkbox" name="fire_enabled_post_types[]" value="<?php echo esc_attr($pt->name); ?>" <?php checked(in_array($pt->name, $enabled)); ?>> <?php echo esc_html($pt->labels->name); ?></label><br>
-                    <?php endforeach; ?>
+                    <h3>General</h3>
+                    <p>Select post types and configure rating criteria in other sections.</p>
                 </div>
 
-                <?php foreach ($enabled as $pt): ?>
-                <div id="tab-<?php echo esc_attr($pt); ?>" class="tab-content" style="display:none;">
-                    <h3><?php echo esc_html($post_types[$pt]->labels->name); ?> Rating Fields</h3>
-                    <table class="form-table fire-table" data-post-type="<?php echo esc_attr($pt); ?>">
-                        <thead><tr><th>Label</th><th>Slug</th><th>Weight</th><th></th></tr></thead>
-                        <tbody>
-                        <?php foreach ($criteria[$pt] ?? [] as $index => $field): ?>
-                            <tr>
-                                <td><input name="fire_criteria[<?php echo $pt; ?>][<?php echo $index; ?>][label]" value="<?php echo esc_attr($field['label']); ?>"></td>
-                                <td><input name="fire_criteria[<?php echo $pt; ?>][<?php echo $index; ?>][slug]" value="<?php echo esc_attr($field['slug']); ?>"></td>
-                                <td><input name="fire_criteria[<?php echo $pt; ?>][<?php echo $index; ?>][weight]" type="number" step="0.1" value="<?php echo esc_attr($field['weight']); ?>"></td>
-                                <td><button type="button" class="remove-row button">×</button></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <p><button type="button" class="add-row button">Add Field</button></p>
-                    <p class="weight-warning" style="color:red;"></p>
+                <div id="tab-template" class="tab-content" style="display:none;">
+                    <h3>Custom Output Template</h3>
+                    <p>Use placeholders: <code>{fields}</code>, <code>{field:slug}</code>, <code>{overall}</code>, <code>{stars}</code></p>
+                    <textarea name="fire_template_html" rows="10" cols="100" style="width:100%;"><?php echo esc_textarea(get_option('sypesr_template_html', '')); ?></textarea>
                 </div>
-                <?php endforeach; ?>
+
+                <div id="tab-help" class="tab-content" style="display:none;">
+                    <h3>FIRE Plugin Help</h3>
+                    <ul>
+                        <li><strong>General:</strong> Select post types where you want to use editorial ratings.</li>
+                        <li><strong>Criteria:</strong> Define rating fields (label, slug, and weight %). Slugs are auto-prefixed with <code>fire-editorial-stars-</code>.</li>
+                        <li><strong>Weight:</strong> The sum of weights for all fields should equal 100%.</li>
+                        <li><strong>Post Editor:</strong> Use the FIRE meta box to enter scores (0.0 to 5.0). The plugin will calculate a weighted average.</li>
+                        <li><strong>Shortcodes:</strong>
+                            <ul>
+                                <li><code>[fire_total]</code> — Displays the overall score</li>
+                                <li><code>[fire_field slug="fire-editorial-stars-games"]</code> — Displays a single field</li>
+                                <li><code>[fire_template]</code> — Uses your custom layout</li>
+                            </ul>
+                        </li>
+                        <li><strong>Template placeholders:</strong>
+                            <ul>
+                                <li><code>{fields}</code> — Full field list</li>
+                                <li><code>{field:slug}</code> — Specific field by slug</li>
+                                <li><code>{overall}</code> — Numeric total</li>
+                                <li><code>{stars}</code> — Star rendering of total</li>
+                            </ul>
+                        </li>
+                        <li><strong>Schema:</strong> JSON-LD is auto-injected into the page head for search engines.</li>
+                        <li><strong>Styling:</strong> Use CSS to style <code>.fire-rating</code> and <code>.fire-stars</code>.</li>
+                    </ul>
+                </div>
 
                 <p><input type="submit" class="button button-primary" value="Save Settings"></p>
-                <?php wp_nonce_field('sypesr_reset_action', 'sypesr_reset_nonce'); ?>
-                <p><input type="submit" name="sypesr_reset" class="button" value="Reset All Settings" onclick="return confirm('Reset all settings?');"></p>
             </form>
         </div>
         <script>
@@ -108,60 +105,6 @@ class FIRE_Admin {
                     contents.forEach(c => c.style.display = 'none');
                     tab.classList.add('nav-tab-active');
                     document.querySelector(tab.getAttribute('href')).style.display = 'block';
-                });
-            });
-
-            document.querySelectorAll('.add-row').forEach(button => {
-                button.addEventListener('click', function () {
-                    const table = this.closest('.tab-content').querySelector('tbody');
-                    const rows = table.querySelectorAll('tr').length;
-                    const pt = table.closest('.fire-table').dataset.postType;
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><input name="fire_criteria[${pt}][${rows}][label]"></td>
-                        <td><input name="fire_criteria[${pt}][${rows}][slug]"></td>
-                        <td><input name="fire_criteria[${pt}][${rows}][weight]" type="number" step="0.1"></td>
-                        <td><button type="button" class="remove-row button">×</button></td>`;
-                    table.appendChild(row);
-                });
-            });
-
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-row')) {
-                    e.target.closest('tr').remove();
-                }
-            });
-
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                document.addEventListener('blur', function(e) {
-                    if (e.target.matches('input[name*="[label]"]')) {
-                        const row = e.target.closest('tr');
-                        const slugInput = row.querySelector('input[name*="[slug]"]');
-                        if (slugInput && slugInput.value.trim() === '') {
-                            const label = e.target.value;
-                            const slug = 'fire-editorial-stars-' + label.toLowerCase()
-                                .replace(/[^a-z0-9\s-]/g, '')
-                                .replace(/\s+/g, '-')
-                                .replace(/-+/g, '-')
-                                .replace(/^-|-$/g, '');
-                            slugInput.value = slug;
-                        }
-                    }
-                });
-            });
-
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                input.addEventListener('input', function () {
-                    document.querySelectorAll('.fire-table').forEach(table => {
-                        const rows = table.querySelectorAll('tbody tr');
-                        let total = 0;
-                        rows.forEach(row => {
-                            const weightInput = row.querySelector('input[name*="[weight]"]');
-                            if (weightInput) total += parseFloat(weightInput.value || 0);
-                        });
-                        const warning = table.closest('.tab-content').querySelector('.weight-warning');
-                        warning.textContent = total.toFixed(1) != 100 ? `⚠️ Total weight is ${total.toFixed(1)}%. Must equal 100%.` : '';
-                    });
                 });
             });
         });
