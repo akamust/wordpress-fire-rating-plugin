@@ -1,0 +1,1 @@
+<?php // FIRE utility functions
