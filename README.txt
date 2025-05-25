@@ -1,130 +1,75 @@
-🔥 FIRE Plugin – Overview (as it stands)
+🔥 FIRE Plugin – Overview
+
 Plugin Purpose
 FIRE (Field-based Individual Rating Engine) is a custom WordPress plugin that enables you to:
 
-Define your own editorial star rating criteria (like Games, Payments, Support…)
+- Define your own editorial star rating criteria (like Games, Payments, Support…)
+- Assign weights to each criterion (e.g. Games = 30%)
+- Automatically calculate an overall score
+- Display ratings via shortcodes or custom templates
+- Output structured data (JSON-LD) for Google
+- Customize the layout with a template editor
+- Add a rating column to the post list view in the WP admin
 
-Assign weights to each criterion (e.g. Games = 30%)
+✅ What FIRE Can Do Today
 
-Automatically calculate an overall score
+🧭 Admin Settings Panel
+- Located at: Settings > FIRE Ratings
+- General tab: select which post types to enable
+- Dynamic tabs for each post type to define criteria:
+  - Each field includes: Label, Slug, Weight (must total 100%)
+  - Slugs are auto-prefixed with `fire-editorial-stars-`
+- Template tab: write your custom output template using placeholders:
+  - `{fields}`, `{field:slug}`, `{overall}`, `{stars}`
+- Help tab: built-in documentation and usage examples
 
-Display ratings via shortcodes or templates (coming soon)
+📝 Editor Experience
+- Custom meta box on selected post types
+- Input scores per field (0.0–5.0, supports decimals)
+- Auto-calculates weighted average
+- Overall score is saved to `_fire_editorial_stars_overall`
 
-Output proper structured data (JSON-LD) for Google (coming soon)
+🔠 Shortcodes
+- `[fire_total]` – Show overall score
+- `[fire_field slug="fire-editorial-stars-games"]` – Show single field
+- `[fire_template]` – Render full layout from template
 
-✅ What FIRE Can Do Today (Confirmed Working)
-Admin Settings Panel:
-Available under Settings > FIRE Ratings
+📦 Schema Output
+- JSON-LD injected automatically on single post pages
+- Includes itemReviewed, reviewRating, and optional reviewAspect for Google
 
-A General tab lets you select which post types should support FIRE (e.g. casinos, bonuses, games)
+📊 Admin Post List Column
+- Adds a "FIRE Rating" column to post list views
+- Sortable by score
+- Shows current average
 
-When post types are selected:
+🛠 All Known Issues Fixed
+1. ✅ Ghost Fields: Resolved via corrected input structure with indexed naming
+2. ✅ Slug Generation: Auto-fills slug on blur, supports override
+3. ✅ Field Cleanup: Validation in save function discards invalid or blank rows
 
-Dynamic tabs appear for each one (e.g. “Casinos Rating Fields”)
-
-You can add any number of rating criteria
-
-Each criterion has: Label, Slug, and Weight
-
-Save Behavior:
-The plugin saves all criteria per post type to sypesr_criteria_config
-
-You can remove or reset the configuration via the Reset button
-
-🛠 What You're Trying to Fix Now (Open Issues)
-1. ❌ Extra Ghost Fields Appearing
-Problem:
-When you add 5 fields, 10+ rows appear on save or reload.
-
-Cause:
-The current input names are incorrectly set like this:
-
-html
-Copy
-Edit
-name="fire_criteria[casino][][label]"
-name="fire_criteria[casino][][slug]"
-name="fire_criteria[casino][][weight]"
-This creates 3 separate arrays instead of 1 grouped object.
-
-Fix Plan:
-
-Input names must be indexed consistently:
-
-html
-Copy
-Edit
-fire_criteria[casino][0][label]
-fire_criteria[casino][0][slug]
-fire_criteria[casino][0][weight]
-2. ❌ No Slug Auto-Generation
-Problem:
-Users are expected to enter a slug manually, or leave it empty.
-
-Fix Plan:
-
-When the user types a label, JS should:
-
-Automatically populate the slug field with a “slugified” version (e.g. Game Selection → game-selection)
-
-Still allow manual override
-
-3. 🧼 Empty Fields Being Saved
-Problem:
-Even if you leave fields blank, they are stored on save.
-
-Fix Plan:
-
-Before saving:
-
-Discard any row where label is empty
-
-Auto-generate slug if missing
-
-Discard if weight is 0 or missing
-
-🔜 Next Steps in Plugin Development
-Phase 2: Post Editor Meta Box
-Show rating inputs (stars or number dropdowns) on posts of selected types
-
-Pull fields from the saved config
-
-Store values in custom fields
-
-Auto-calculate average based on weights
-
-Show score preview in the editor
-
-Phase 3: Frontend Output
-Shortcodes:
-
-[fire_total] – show overall score
-
-[fire_criteria field="games"] – show individual score
-
-[fire_template] – display all rating fields
-
-Option to show stars or numbers
-
-Customize star styles (color, shape, count)
-
-Phase 4: Structured Data
-Output proper JSON-LD schema.org/Review markup
-
-Include:
-
-itemReviewed: Post title or custom label
-
-reviewRating: average score
-
-reviewAspect: each rating criterion
+📅 Development Completed Through:
+✔ Post editor integration
+✔ Frontend display via shortcodes and template system
+✔ Schema integration
+✔ Template layout editor
+✔ Admin help documentation
 
 ✅ Summary
-Area	Status
-General Settings Tab	✅ Working
-Post Type Tabs	✅ Working
-Add Fields	✅ UI works
-Save/Reload	✅ Working
-Input structure bug	❌ Needs fix
-Slug generation	❌ Needs JS
-Field cleanup on save	❌ Needs validation
+
+| Area                    | Status     |
+|-------------------------|------------|
+| General Settings Tab    | ✅ Working |
+| Post Type Tabs          | ✅ Working |
+| Add/Edit Fields         | ✅ Working |
+| Auto-Prefixed Slugs     | ✅ Working |
+| Field Validation        | ✅ Working |
+| Slug Auto-Fill          | ✅ Working |
+| Save/Reload             | ✅ Working |
+| Post Editor UI          | ✅ Working |
+| Weighted Total Score    | ✅ Working |
+| Shortcodes              | ✅ Working |
+| Custom Template Editor  | ✅ Working |
+| Schema Markup Output    | ✅ Working |
+| Admin Column View       | ✅ Working |
+| Built-in Help Tab       | ✅ Working |
