@@ -13,10 +13,10 @@ class FIRE_Template {
 
         foreach ($fields as $field) {
             $slug = $field['slug'];
-            $label = $field['label'];
+            $label = esc_html($field['label']);
             $value = get_post_meta($post_id, "_{$slug}", true);
             if ($value !== '') {
-                $output_fields .= "<p>{$label}: " . self::stars($value) . " {$value} / 5</p>";
+                $output_fields .= "<p>{$label}: " . self::stars($value) . " " . esc_html($value) . " / 5</p>";
             }
         }
 
@@ -25,14 +25,14 @@ class FIRE_Template {
 
         $replaced = $template;
         $replaced = str_replace('{fields}', $output_fields, $replaced);
-        $replaced = str_replace('{overall}', $overall, $replaced);
+        $replaced = str_replace('{overall}', esc_html($overall), $replaced);
         $replaced = str_replace('{stars}', $stars, $replaced);
 
         foreach ($fields as $field) {
             $slug = $field['slug'];
-            $label = $field['label'];
+            $label = esc_html($field['label']);
             $value = get_post_meta($post_id, "_{$slug}", true);
-            $replaced = str_replace("{field:$slug}", "{$label}: " . self::stars($value) . " {$value} / 5", $replaced);
+            $replaced = str_replace("{field:$slug}", "{$label}: " . self::stars($value) . " " . esc_html($value) . " / 5", $replaced);
         }
 
         return $replaced;
