@@ -58,7 +58,7 @@ class FIRE_Template {
                         </clipPath>
                     </defs>
                     <polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#e0e0e0" stroke="#FFD700"/>
-                    <polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#FFD700" stroke="#FFD700" clip-path="url(#' . $grad_id . ')\"/>
+                    <polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#FFD700" stroke="#FFD700" clip-path="url(#' . $grad_id . ')" />
                 </svg>';
             } else {
                 // Empty star

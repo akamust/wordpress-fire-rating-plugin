@@ -32,7 +32,7 @@ class FIRE_Meta_Box {
             $label = $field['label'];
             $value = get_post_meta($post->ID, "_{$slug}", true);
             echo "<tr><th scope='row'><label for='{$slug}'>{$label}</label></th>";
-            echo "<td><input type='number' step='0.1' min='0' max='5' name='fire_rating[{$slug}]' id='{$slug}' value='" . esc_attr($value) . "' class='small-text' /></td></tr>";
+            echo "<td><input type='number' step='0.5' min='0' max='5' name='fire_rating[{$slug}]' id='{$slug}' value='" . esc_attr($value) . "' class='small-text' /></td></tr>";
         }
         echo '</table>';
 
@@ -60,6 +60,7 @@ class FIRE_Meta_Box {
             $slug = $field['slug'];
             $weight = floatval($field['weight']);
             $val = isset($ratings[$slug]) ? floatval($ratings[$slug]) : 0;
+            $val = round($val * 2) / 2; // round to nearest 0.5
             $val = max(0, min(5, $val)); // clamp between 0–5
             update_post_meta($post_id, "_{$slug}", $val);
             $total += $val * $weight;
@@ -67,7 +68,8 @@ class FIRE_Meta_Box {
         }
 
         if ($weight_sum > 0) {
-            $overall = round($total / $weight_sum, 1);
+            $overall = $total / $weight_sum;
+            $overall = round($overall * 2) / 2; // round to nearest 0.5
             update_post_meta($post_id, '_fire_editorial_stars_overall', $overall);
         }
     }
