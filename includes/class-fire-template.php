@@ -39,12 +39,32 @@ class FIRE_Template {
     }
 
     public static function stars($value) {
-        if ($value === '') return '';
-        $stars = floor($value);
-        $half = ($value - $stars >= 0.25 && $value - $stars <= 0.75);
-        $full = str_repeat('★', $stars);
-        $halfStar = $half ? '½' : '';
-        $empty = str_repeat('☆', 5 - $stars - ($half ? 1 : 0));
-        return "<span class='fire-stars'>{$full}{$halfStar}{$empty}</span>";
+        if ($value === '' || $value === false) return '';
+        $value = floatval($value);
+        $stars_html = '';
+        $unique = uniqid('star');
+        for ($i = 1; $i <= 5; $i++) {
+            if ($value >= $i) {
+                // Full star
+                $stars_html .= '<svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#FFD700" stroke="#FFD700"/></svg>';
+            } elseif ($value > $i - 1) {
+                // Partial star
+                $percent = ($value - ($i - 1));
+                $grad_id = $unique . '_starGrad' . $i;
+                $stars_html .= '<svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;">
+                    <defs>
+                        <clipPath id="' . $grad_id . '">
+                            <rect x="0" y="0" width="' . (20 * $percent) . '" height="20" />
+                        </clipPath>
+                    </defs>
+                    <polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#e0e0e0" stroke="#FFD700"/>
+                    <polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#FFD700" stroke="#FFD700" clip-path="url(#' . $grad_id . ')\"/>
+                </svg>';
+            } else {
+                // Empty star
+                $stars_html .= '<svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><polygon points="10,1 12.59,7.36 19.51,7.36 13.96,11.64 16.55,18 10,13.72 3.45,18 6.04,11.64 0.49,7.36 7.41,7.36" fill="#e0e0e0" stroke="#FFD700"/></svg>';
+            }
+        }
+        return '<span class="fire-stars" style="display:inline-block;line-height:1;">' . $stars_html . '</span> <span class="fire-stars-value" style="font-weight:bold;vertical-align:middle;">' . number_format($value, 1) . ' / 5</span>';
     }
 }

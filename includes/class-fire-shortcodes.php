@@ -4,12 +4,20 @@ class FIRE_Shortcodes {
         add_shortcode('fire_total', [$this, 'shortcode_total']);
         add_shortcode('fire_field', [$this, 'shortcode_field']);
         add_shortcode('fire_template', [$this, 'shortcode_template']);
+        add_shortcode('fire_debug_meta', [$this, 'shortcode_debug_meta']);
     }
 
     public function shortcode_total($atts) {
         $post_id = get_the_ID();
         $overall = get_post_meta($post_id, '_fire_editorial_stars_overall', true);
-        return $overall ? "⭐ " . esc_html($overall) . " / 5" : '';
+        if (!class_exists('FIRE_Template')) {
+            require_once plugin_dir_path(__FILE__) . 'class-fire-template.php';
+        }
+        if ($overall !== '' && $overall !== false) {
+            return '<p><span class="fire-stars-label" style="font-weight:bold;">Overall rating:</span> ' . FIRE_Template::stars($overall) . '</p>';
+        } else {
+            return '';
+        }
     }
 
     public function shortcode_field($atts) {
@@ -18,7 +26,14 @@ class FIRE_Shortcodes {
         $post_id = get_the_ID();
         $score = get_post_meta($post_id, "_" . $atts['slug'], true);
         $label = ucwords(str_replace('-', ' ', str_replace('fire-editorial-stars-', '', $atts['slug'])));
-        return $score ? esc_html($label . ': ⭐ ' . $score . ' / 5') : '';
+        if ($score === '' || $score === false) {
+            $score = 0;
+        }
+        if (!class_exists('FIRE_Template')) {
+            require_once plugin_dir_path(__FILE__) . 'class-fire-template.php';
+        }
+        $stars = FIRE_Template::stars($score);
+        return '<p>' . esc_html($label) . ': ' . $stars . '</p>';
     }
 
     public function shortcode_template($atts) {
@@ -43,5 +58,15 @@ class FIRE_Shortcodes {
         }
         $output .= '</div>';
         return $output;
+    }
+
+    public function shortcode_debug_meta($atts) {
+        $post_id = get_the_ID();
+        $meta = get_post_meta($post_id);
+        ob_start();
+        echo '<pre>';
+        print_r($meta);
+        echo '</pre>';
+        return ob_get_clean();
     }
 }
