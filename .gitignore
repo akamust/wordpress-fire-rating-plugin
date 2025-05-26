@@ -1,0 +1,25 @@
+# Ignore everything except the plugin files
+node_modules/
+vendor/
+*.log
+*.zip
+*.tar.gz
+*.rar
+.DS_Store
+Thumbs.db
+
+# IDE and OS specific
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# WordPress specific
+wp-config.php
+wp-content/
+wp-admin/
+wp-includes/
+
+# Composer
+composer.lock
+composer.phar
