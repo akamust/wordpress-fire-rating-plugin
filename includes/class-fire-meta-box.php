@@ -38,7 +38,7 @@ class FIRE_Meta_Box {
 
         $overall = get_post_meta($post->ID, '_fire_editorial_stars_overall', true);
         if ($overall) {
-            echo '<p><strong>Overall Score:</strong> ' . esc_html($overall) . ' / 5</p>';
+            echo '<p><strong>Overall Score:</strong> ' . number_format($overall, 1) . ' / 5</p>';
         }
     }
 
@@ -69,7 +69,7 @@ class FIRE_Meta_Box {
 
         if ($weight_sum > 0) {
             $overall = $total / $weight_sum;
-            $overall = round($overall * 2) / 2; // round to nearest 0.5
+            $overall = round($overall * 10) / 10; // round to nearest 0.1
             update_post_meta($post_id, '_fire_editorial_stars_overall', $overall);
         }
     }
